@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>トイプードル・表情タップゲーム</title>
+    <title>トイプードル・表情タップゲーム </title>
     <style>
         body { font-family: 'Arial', sans-serif; text-align: center; background-color: #fce4ec; color: #5d4037; }
         #game-container { max-width: 600px; margin: 20px auto; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
