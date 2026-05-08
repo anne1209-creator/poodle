@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>トイプードル・表情タップゲーム</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; text-align: center; background-color: #fce4ec; color: #5d4037; }
+        #game-container { max-width: 600px; margin: 20px auto; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
+        #target-display { font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #d81b60; }
+        #timer-bar-container { width: 100%; height: 10px; background: #eee; border-radius: 5px; margin-bottom: 20px; overflow: hidden; }
+        #timer-bar { width: 100%; height: 100%; background: #ff4081; transition: width 0.1s linear; }
+        #grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .poodle { font-size: 60px; cursor: pointer; border: 4px solid transparent; border-radius: 10px; transition: transform 0.1s; position: relative; }
+        .poodle:hover { transform: scale(1.05); background: #fff9c4; }
+        .poodle-face { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -10%); font-size: 24px; pointer-events: none; }
+        .hidden { display: none; }
+        #score-display { margin-top: 15px; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>🐩 Poodle Tap!</h1>
+    
+    <div id="game-container">
+        <div id="target-display">「<span id="target-name">???</span>」をさがせ！</div>
+        
+        <div id="timer-bar-container">
+            <div id="timer-bar"></div>
+        </div>
+
+        <div id="grid"></div>
+
+        <div id="score-display">Score: <span id="score">0</span></div>
+        
+        <div id="overlay" class="hidden">
+            <h2 id="final-msg">GAME OVER</h2>
+            <button onclick="startGame()" style="padding: 10px 20px; font-size: 18px; cursor: pointer;">もう一度挑戦</button>
+        </div>
+    </div>
+
+<script>
+    const faces = [
+        { name: 'えがお', icon: '😊' },
+        { name: 'なみだ', icon: '😢' },
+        { name: 'おこ', icon: '💢' },
+        { name: 'おどろき', icon: '😲' },
+        { name: 'ねむい', icon: '😴' },
+        { name: 'てれ', icon: '😚' }
+    ];
+
+    let score = 0;
+    let timeLeft = 100;
+    let timerInterval;
+    let targetFace;
+    let difficulty = 2000; // 初期制限時間(ms)
+
+    function startGame() {
+        score = 0;
+        difficulty = 2000;
+        document.getElementById('score').innerText = score;
+        document.getElementById('overlay').classList.add('hidden');
+        nextRound();
+    }
+
+    function nextRound() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        
+        // 今回の正解を決める
+        targetFace = faces[Math.floor(Math.random() * faces.length)];
+        document.getElementById('target-name').innerText = targetFace.name;
+
+        // 9つのトイプードルを生成
+        for (let i = 0; i < 9; i++) {
+            const poodleDiv = document.createElement('div');
+            poodleDiv.className = 'poodle';
+            poodleDiv.innerHTML = '🐩';
+            
+            // ランダムな表情を割り当てる（最低1つは正解を入れる）
+            const randomFace = (i === 0) ? targetFace : faces[Math.floor(Math.random() * faces.length)];
+            
+            const faceSpan = document.createElement('span');
+            faceSpan.className = 'poodle-face';
+            faceSpan.innerText = randomFace.icon;
+            poodleDiv.appendChild(faceSpan);
+            
+            poodleDiv.onclick = () => checkAnswer(randomFace);
+            
+            // シャッフルして配置
+            poodleDiv.style.order = Math.floor(Math.random() * 10);
+            grid.appendChild(poodleDiv);
+        }
+
+        startTimer();
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        let start = Date.now();
+        timerInterval = setInterval(() => {
+            let elapsed = Date.now() - start;
+            let percentage = 100 - (elapsed / difficulty * 100);
+            document.getElementById('timer-bar').style.width = percentage + '%';
+            
+            if (percentage <= 0) {
+                gameOver("時間切れ！");
+            }
+        }, 50);
+    }
+
+    function checkAnswer(selected) {
+        if (selected.name === targetFace.name) {
+            score++;
+            document.getElementById('score').innerText = score;
+            difficulty = Math.max(600, difficulty - 50); // 徐々に難しく
+            nextRound();
+        } else {
+            gameOver("ちがう表情だよ！");
+        }
+    }
+
+    function gameOver(msg) {
+        clearInterval(timerInterval);
+        document.getElementById('final-msg').innerText = msg + " Score: " + score;
+        document.getElementById('overlay').classList.remove('hidden');
+    }
+
+    // 初回起動
+    startGame();
+</script>
+</body>
+</html>
